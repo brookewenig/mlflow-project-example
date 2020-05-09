@@ -9,9 +9,9 @@ import click
 
 @click.command()
 @click.option("--file_path", default="/databricks-datasets/learning-spark-v2/sf-airbnb/sf-airbnb-clean.parquet", type=str)
+@click.option("--num_trees", default=20, type=int)
 @click.option("--max_depth", default=5, type=int)
-@click.option("--max_depth", default=5, type=int)
-def mlflow_rf(num_trees, max_depth):
+def mlflow_rf(file_path, num_trees, max_depth):
   with mlflow.start_run(run_name="random-forest") as run:
     # Create train/test split
     airbnbDF = spark.read.parquet(file_path)
