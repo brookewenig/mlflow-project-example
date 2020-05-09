@@ -2,8 +2,8 @@ name: tutorial
 channels:
   - defaults
 dependencies:
-  - python=3.6
-  - pandas=0.22.0
-  - spark>=3.0.0
+  - python>=3.6
+  - pandas>=0.22.0
+  - pyspark>=2.4
   - pip:
     - mlflow>=1.7
