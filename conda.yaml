@@ -1,9 +1,9 @@
-name: tutorial
+name: mlflow-project-example
 channels:
   - defaults
 dependencies:
-  - python>=3.6
-  - pandas>=0.22.0
-  - pyspark>=2.4
+  - python=3.7
+  - pandas=1.0.1
+  - pyspark=3.0.0.dev0
   - pip:
-    - mlflow==1.7
+    - mlflow==1.8
