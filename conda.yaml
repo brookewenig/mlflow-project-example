@@ -6,4 +6,4 @@ dependencies:
   - pandas>=0.22.0
   - pyspark>=2.4
   - pip:
-    - mlflow>=1.7
+    - mlflow==1.7
