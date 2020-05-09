@@ -63,3 +63,6 @@ def mlflow_rf(file_path, num_trees, max_depth):
     # First write to local filesystem, then tell MLflow where to find that file
     pandasDF.to_csv("feature-importance.csv", index=False)
     mlflow.log_artifact("feature-importance.csv")
+
+if __name__ == "__main__":
+  mlflow_rf()
