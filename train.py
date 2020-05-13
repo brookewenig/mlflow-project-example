@@ -8,8 +8,6 @@ import mlflow.spark
 import pandas as pd
 import click
 
-spark = SparkSession.builder.appName("App").getOrCreate()
-
 @click.command()
 @click.option("--file_path", default="data/sf-airbnb-clean.parquet", type=str)
 @click.option("--num_trees", default=20, type=int)
