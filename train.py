@@ -15,7 +15,6 @@ import click
 def mlflow_rf(file_path, num_trees, max_depth):
   with mlflow.start_run(run_name="random-forest") as run:
     # Create train/test split
-    spark = SparkSession.builder.appName("App").getOrCreate()
     airbnbDF = spark.read.parquet(file_path)
     (trainDF, testDF) = airbnbDF.randomSplit([.8, .2], seed=42)
 
@@ -59,4 +58,5 @@ def mlflow_rf(file_path, num_trees, max_depth):
     mlflow.log_artifact("/tmp/feature-importance.csv")
 
 if __name__ == "__main__":
+  spark = SparkSession.builder.appName("App").getOrCreate()
   mlflow_rf()
