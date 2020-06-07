@@ -30,8 +30,8 @@ def mlflow_rf(file_path, num_trees, max_depth):
     indexCols = [c + "Index" for c in categoricalColumns]
     numericCols = [field for (field, dataType) in trainDF.dtypes if ((dataType == "double") & (field != "price"))]
     assemblerInputs = indexCols + numericCols
-    assembler = VectorAssembler(inputCols=assemblerInputs, outputCol="features")
-    stages += [assembler]
+    vecAssembler = VectorAssembler(inputCols=assemblerInputs, outputCol="features")
+    stages += [vecAssembler]
     
     # Log params: Num Trees and Max Depth
     mlflow.log_param("num_trees", num_trees)
