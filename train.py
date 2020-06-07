@@ -1,12 +1,14 @@
 from pyspark.sql import SparkSession
 from pyspark.ml import Pipeline
-from pyspark.ml.feature import VectorAssembler
+from pyspark.ml.feature import VectorAssembler, StringIndexer
 from pyspark.ml.regression import RandomForestRegressor
 from pyspark.ml.evaluation import RegressionEvaluator
 import mlflow
 import mlflow.spark
 import pandas as pd
 import click
+
+spark = SparkSession.builder.appName("App").getOrCreate()
 
 @click.command()
 @click.option("--file_path", default="data/sf-airbnb-clean.parquet", type=str)
@@ -15,14 +17,22 @@ import click
 def mlflow_rf(file_path, num_trees, max_depth):
   with mlflow.start_run(run_name="random-forest") as run:
     # Create train/test split
+    spark = SparkSession.builder.appName("App").getOrCreate()
     airbnbDF = spark.read.parquet(file_path)
     (trainDF, testDF) = airbnbDF.randomSplit([.8, .2], seed=42)
 
     # Prepare the StringIndexer and VectorAssembler
-    numericCols = [field for (field, dataType) in trainDF.dtypes
-                   if ((dataType == "double") & (field != "price"))]
-    vecAssembler = VectorAssembler(inputCols=numericCols,
-                                   outputCol="features")
+    categoricalColumns = [field for (field, dataType) in trainDF.dtypes if dataType == "string"]
+    stages = [] 
+    for categoricalCol in categoricalColumns:
+        stages += [StringIndexer(inputCol=categoricalCol, outputCol=categoricalCol + "Index", handleInvalid="skip")]
+
+    indexCols = [c + "Index" for c in categoricalColumns]
+    numericCols = [field for (field, dataType) in trainDF.dtypes if ((dataType == "double") & (field != "price"))]
+    assemblerInputs = indexCols + numericCols
+    assembler = VectorAssembler(inputCols=assemblerInputs, outputCol="features")
+    stages += [assembler]
+    
     # Log params: Num Trees and Max Depth
     mlflow.log_param("num_trees", num_trees)
     mlflow.log_param("max_depth", max_depth)
@@ -32,8 +42,8 @@ def mlflow_rf(file_path, num_trees, max_depth):
                                maxDepth=max_depth,
                                numTrees=num_trees,
                                seed=42)
-
-    pipeline = Pipeline(stages=[vecAssembler, rf])
+    stages += [rf]
+    pipeline = Pipeline(stages=stages)
 
     # Log model
     pipelineModel = pipeline.fit(trainDF)
@@ -58,5 +68,4 @@ def mlflow_rf(file_path, num_trees, max_depth):
     mlflow.log_artifact("/tmp/feature-importance.csv")
 
 if __name__ == "__main__":
-  spark = SparkSession.builder.appName("App").getOrCreate()
   mlflow_rf()
